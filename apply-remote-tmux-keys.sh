@@ -93,6 +93,10 @@ do
         bind_key="'\"'"
         send_key="'\\\"'"
         key_name="DoubleQuote"
+    elif [ $bind_key == '\"' ]; then
+        bind_key="'\"'"
+        send_key="'\\\"'"
+        key_name="DoubleQuote"
     elif [ $bind_key == "~" ]; then
         bind_key="'~'"
         send_key="'~'"
