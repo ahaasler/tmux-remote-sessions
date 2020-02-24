@@ -45,7 +45,8 @@ declare -a FORWARD_COMMAND_WHITELIST=("break-pane"
                                       "previous-window"
                                       "next-window")
 
-declare -a FORWARD_COMMAND_ROOT_WHITELIST=("select-pane")
+declare -a FORWARD_COMMAND_ROOT_WHITELIST=("select-pane"
+                                           "resize-pane")
 
 INPUT_FILE="$SCRIPT_DIR/original_bindings.txt"
 TMP_FILE="$(mktemp)"
@@ -157,6 +158,16 @@ do
               send_key="C-b Left"
             elif [[ "$bind_command" = *"-R" ]]; then
               send_key="C-b Right"
+            fi
+          elif [[ "$bind_command" = "resize-pane -"* ]]; then
+            if [[ "$bind_command" = *"-U" ]]; then
+              send_key="C-b C-Up"
+            elif [[ "$bind_command" = *"-D" ]]; then
+              send_key="C-b C-Down"
+            elif [[ "$bind_command" = *"-L" ]]; then
+              send_key="C-b C-Left"
+            elif [[ "$bind_command" = *"-R" ]]; then
+              send_key="C-b C-Right"
             fi
           fi
           remote_keys="\"send-keys $send_key\""
