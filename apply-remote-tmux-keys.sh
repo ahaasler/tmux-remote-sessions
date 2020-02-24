@@ -45,6 +45,7 @@ declare -a FORWARD_COMMAND_WHITELIST=("break-pane"
                                       "previous-window"
                                       "next-window")
 
+declare -a FORWARD_COMMAND_ROOT_WHITELIST=("select-pane")
 
 INPUT_FILE="$SCRIPT_DIR/original_bindings.txt"
 TMP_FILE="$(mktemp)"
@@ -65,7 +66,6 @@ bind_command_regexp="^bind-key +((-r) +)?-T ([^ ]+) +([^ ]+) +(.+)$"
 
 while read -r line
 do
-
   if [[ $line =~ $bind_command_regexp ]]; then
     bind_flags="${BASH_REMATCH[2]}"
     bind_key_table="${BASH_REMATCH[3]}"
@@ -143,6 +143,43 @@ do
         fi
       done
     done
+
+    if [[ "$bind_key_table" == "root" ]]; then
+      for tmux_command in "${FORWARD_COMMAND_ROOT_WHITELIST[@]}"; do
+        if [[ "$bind_command" = *"$tmux_command"* ]]; then
+          remote_test="if-shell -F \"#{m:*remote,#{session_name}}\""
+          if [[ "$bind_command" = "select-pane -"* ]]; then
+            if [[ "$bind_command" = *"-U" ]]; then
+              send_key="C-b Up"
+            elif [[ "$bind_command" = *"-D" ]]; then
+              send_key="C-b Down"
+            elif [[ "$bind_command" = *"-L" ]]; then
+              send_key="C-b Left"
+            elif [[ "$bind_command" = *"-R" ]]; then
+              send_key="C-b Right"
+            fi
+          fi
+          remote_keys="\"send-keys $send_key\""
+          if [[ $bind_command = *"\""* || $bind_key = *"\""* ]]; then
+            echo "  \"${bind_key_table}-${key_name}\")" >> $TRIGGER_COMMAND_FILE
+            echo "    tmux $bind_command" >> $TRIGGER_COMMAND_FILE
+            echo "    ;;" >> $TRIGGER_COMMAND_FILE
+            echo "" >> $TRIGGER_COMMAND_FILE
+
+            echo "unbind-key -T $bind_key_table $bind_key" >> $TMP_FILE
+            echo "bind-key $bind_flags -T $bind_key_table $bind_key $remote_test $remote_keys \"run-shell '$TRIGGER_COMMAND_FILE ${bind_key_table}-${key_name}'\"" >> $TMP_FILE
+          else
+            local_command="\"$bind_command\""
+            bind_command="$remote_test $remote_keys $local_command"
+            quote_semicolons "$bind_command"
+            bind_command="$return_value"
+
+            echo "unbind-key -T $bind_key_table $bind_key" >> $TMP_FILE
+            echo "bind-key $bind_flags -T $bind_key_table $bind_key $bind_command" >> $TMP_FILE
+          fi
+        fi
+      done
+    fi
 
   else
     echo "Regexp failed to parse bind-key line: '$line'"
