@@ -151,23 +151,23 @@ do
           remote_test="if-shell -F \"#{m:*remote,#{session_name}}\""
           if [[ "$bind_command" = "select-pane -"* ]]; then
             if [[ "$bind_command" = *"-U" ]]; then
-              send_key="C-b Up"
+              send_key="C-b Up C-b"
             elif [[ "$bind_command" = *"-D" ]]; then
-              send_key="C-b Down"
+              send_key="C-b Down C-b"
             elif [[ "$bind_command" = *"-L" ]]; then
-              send_key="C-b Left"
+              send_key="C-b Left C-b"
             elif [[ "$bind_command" = *"-R" ]]; then
-              send_key="C-b Right"
+              send_key="C-b Right C-b"
             fi
           elif [[ "$bind_command" = "resize-pane -"* ]]; then
             if [[ "$bind_command" = *"-U" ]]; then
-              send_key="C-b C-Up"
+              send_key="C-b C-Up C-b"
             elif [[ "$bind_command" = *"-D" ]]; then
-              send_key="C-b C-Down"
+              send_key="C-b C-Down C-b"
             elif [[ "$bind_command" = *"-L" ]]; then
-              send_key="C-b C-Left"
+              send_key="C-b C-Left C-b"
             elif [[ "$bind_command" = *"-R" ]]; then
-              send_key="C-b C-Right"
+              send_key="C-b C-Right C-b"
             fi
           fi
           remote_keys="\"send-keys $send_key\""
